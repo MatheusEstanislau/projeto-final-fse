@@ -9,7 +9,7 @@ CORS(app)
 @api.route('/hello')
 class HelloWorld(Resource):
     def get(self):
-        return {'hello': 'Olá Cristo'}
+        return {'hello': 'Olá Renan'}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
