@@ -1,0 +1,7 @@
+services:
+  back-end:
+    build: ./backend
+    volumes:
+      - ./backend:/flaskApp
+    ports:
+      - "5000:5000"
