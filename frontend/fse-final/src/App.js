@@ -1,18 +1,24 @@
-import api from './api/services/api'
-import React, {useState, useEffect} from 'react'
+import React from 'react'
+import { BrowserRouter } from 'react-router-dom'
+import Routes from './routes'
+import { CssBaseline } from '@material-ui/core'
+import AppBar from './components/AppBar'
+import Drawer from './components/Drawer'
+import { AppProvider } from './hooks/useApp'
 
 function App() {
-  const [response, setResponse] = useState();
-  const fetchData = async () => {
-    const {data} = await api.get('/hello')
-    setResponse(data.hello)
-  }
-  useEffect(() => {
-    fetchData()
-  }, []);
   return (
-    <div>{response}</div>
-  );
+    <>
+      <CssBaseline />
+      <BrowserRouter>
+        <AppProvider>
+          <AppBar />
+          <Drawer />
+          <Routes />
+        </AppProvider>
+      </BrowserRouter>
+    </>
+  )
 }
 
-export default App;
+export default App
