@@ -50,7 +50,7 @@ const Device = ({ name, id, temperature, humidity }) => {
 
   const useStyles = makeStyles((theme) => ({
     card: {
-      backgroundColor: '#ededede',
+      backgroundColor: '#EDEDED',
       marginTop: '2rem',
       marginLeft: '2rem',
       padding: '1rem',
@@ -74,6 +74,10 @@ const Device = ({ name, id, temperature, humidity }) => {
   }))
 
   const styles = useStyles()
+
+  client.on('message', function(topic, message){
+    console.log(message.toString());
+  })
 
   return (
     <Card className={styles.card}>
