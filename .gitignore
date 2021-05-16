@@ -2,6 +2,7 @@
 
 # dependencies
 fse-final/node_modules/
+frontend/fse-final/node_modules/
 backend/.idea/
 /.pnp
 .pnp.js
