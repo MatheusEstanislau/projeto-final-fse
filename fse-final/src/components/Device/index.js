@@ -5,6 +5,8 @@ import {
   Typography,
   Button,
   TextField,
+  makeStyles,
+  Box
 } from '@material-ui/core'
 import { useApp } from '../../hooks/useApp'
 
@@ -46,20 +48,53 @@ const Device = ({ name, id, temperature, humidity }) => {
     client.subscribe(`fse2020/150141220/${deviceName}/#`)
   }, [publishName])
 
+  const useStyles = makeStyles((theme) => ({
+    card: {
+      backgroundColor: '#ededede',
+      marginTop: '2rem',
+      marginLeft: '2rem',
+      padding: '1rem',
+      border: '1px solid black',
+      borderRadius: '10px',
+    },
+    addNameButton: {
+      backgroundColor: '#00BFFF',
+      color: 'white',
+      marginTop: '1rem',
+      marginBottom: '1rem',
+    },
+    sendButton: {
+      backgroundColor: '#00BFFF',
+      color: 'white',
+    },
+    textBox: {
+      display: 'flex',
+      justifyContent: 'space-between'
+    },
+  }))
+
+  const styles = useStyles()
+
   return (
-    <Card>
+    <Card className={styles.card}>
       <Typography>{`Device Id: ${id}`}</Typography>
       <Typography>{`Device name: ${deviceName}`}</Typography>
       <Typography>{`Temperature: ${deviceTemperature}`}</Typography>
       <Typography>{`Humidity: ${deviceHumidity}`}</Typography>
       {name === '' ? (
-        <Button onClick={() => handleClick()}>Add name</Button>
+        <Box>
+          <Button 
+            className={styles.addNameButton} 
+            onClick={() => handleClick()}>
+              Add name
+          </Button>
+        </Box>
       ) : null}
       {showInput ? (
-        <>
+        <Box className={styles.textBox}>
           <TextField variant='outlined' onChange={(e) => handleChange(e)} />
-          <Button onClick={() => publishName()}>Send</Button>
-        </>
+          <Button className={styles.sendButton} onClick={() => publishName()}>Send</Button>
+        </Box>
       ) : null}
     </Card>
   )
