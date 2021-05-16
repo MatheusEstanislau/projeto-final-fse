@@ -11,8 +11,8 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
-#define WIFI_SSID  "Matheus"
-#define WIFI_PASS  "ame26081996"
+#define WIFI_SSID  ""
+#define WIFI_PASS  ""
 #define WIFI_MAXIMUM_RETRY  4
 
 #define WIFI_CONNECTED_BIT BIT0
