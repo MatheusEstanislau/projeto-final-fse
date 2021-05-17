@@ -1,3 +1,5 @@
+#include "wifi.h"
+
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -11,9 +13,9 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
-#define WIFI_SSID  ""
-#define WIFI_PASS  ""
-#define WIFI_MAXIMUM_RETRY  4
+#define WIFI_SSID      CONFIG_ESP_WIFI_SSID
+#define WIFI_PASS      CONFIG_ESP_WIFI_PASSWORD
+#define WIFI_MAXIMUM_RETRY  CONFIG_ESP_MAXIMUM_RETRY
 
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT      BIT1
@@ -31,7 +33,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        if (s_retry_num < WIFI_MAXIMUM_RETRY) {
+        if (s_retry_num < 10) {
             esp_wifi_connect();
             s_retry_num++;
             ESP_LOGI(TAG, "retry to connect to the AP");
@@ -50,6 +52,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
 
 void wifi_start(){
 
+
     s_wifi_event_group = xEventGroupCreate();
 
     ESP_ERROR_CHECK(esp_netif_init());
@@ -65,8 +68,8 @@ void wifi_start(){
 
     wifi_config_t wifi_config = {
         .sta = {
-            .ssid = WIFI_SSID,
-            .password = WIFI_PASS
+            .ssid = "",
+            .password = ""
         },
     };
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
@@ -85,15 +88,15 @@ void wifi_start(){
 
     /* xEventGroupWaitBits() returns the bits before the call returned, hence we can test which event actually
      * happened. */
-    if (bits & WIFI_CONNECTED_BIT) {
-        ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
-                 WIFI_SSID, WIFI_PASS);
-    } else if (bits & WIFI_FAIL_BIT) {
-        ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
-                 WIFI_SSID, WIFI_PASS);
-    } else {
-        ESP_LOGE(TAG, "UNEXPECTED EVENT");
-    }
+    // if (bits & WIFI_CONNECTED_BIT) {
+    //     ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
+    //              WIFI_SSID, WIFI_PASS);
+    // } else if (bits & WIFI_FAIL_BIT) {
+    //     ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
+    //              WIFI_SSID, WIFI_PASS);
+    // } else {
+    //     ESP_LOGE(TAG, "UNEXPECTED EVENT");
+    // }
 
     //ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler));
     //ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler));
