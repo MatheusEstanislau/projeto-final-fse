@@ -5,6 +5,8 @@
     ".prettierrc": "json",
     "*.tsx": "typescriptreact",
     "mqtt_client.h": "c",
-    "cjson.h": "c"
+    "cjson.h": "c",
+    "gpio.h": "c",
+    "stdio.h": "c"
   }
 }

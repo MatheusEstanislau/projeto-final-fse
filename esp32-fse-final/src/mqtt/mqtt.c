@@ -23,6 +23,7 @@
 #include <stdbool.h>
 
 #include "../dht/dht11.h"
+#include "led/ledGpio.h"
 
 #define TAG "MQTT"
 
@@ -47,7 +48,6 @@ void mqtt_connected()
     char *string = cJSON_Print(json);
     mqtt_envia_mensagem(registerTopic, string);
 
-    // int msg_id = esp_mqtt_client_subscribe(client, registerTopic, 0);
     esp_mqtt_client_subscribe(client, registerTopic, 0);
 }
 
@@ -99,12 +99,11 @@ void sendTemperatureHumidity()
 
 void mqtt_message_handler(char *messageRecieved)
 {
-    // bool checkItem;
+    handleLed(1);
     cJSON *message;
     message = cJSON_Parse(messageRecieved);
     if (cJSON_HasObjectItem(message, "installedRoom"))
     {
-        // bool initialized = true;
         char room[30];
         strcpy(room, cJSON_GetObjectItem(message, "installedRoom")->valuestring);
         build_string_topic(room);
@@ -117,8 +116,6 @@ void mqtt_message_handler(char *messageRecieved)
 
 static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
 {
-    // esp_mqtt_client_handle_t client = event->client;
-
     switch (event->event_id)
     {
     case MQTT_EVENT_CONNECTED:
