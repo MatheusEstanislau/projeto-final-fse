@@ -1,13 +1,11 @@
-import React, { useState, useEffect, memo } from 'react'
-import { Typography, Grid } from '@material-ui/core'
-import mqtt from 'mqtt'
+import React, { useState, useEffect } from 'react'
+import { Container, Grid } from '@material-ui/core'
 import { useApp } from '../../hooks/useApp'
 import Device from '../../components/Device/index'
 
 const Home = () => {
-  const { devices, addDevice, client} = useApp()
+  const { devices, client} = useApp()
   const [dev, setDev] = useState([{}])
-  const [message, setMessage] = useState('')
 
   const memoizedValue = (id) => {
     const auxArray = dev
@@ -21,6 +19,9 @@ const Home = () => {
 
   client.on('connect', function () {
     client.subscribe('fse2020/150141220/dispositivos/#', function (err) {
+      if(!err){
+        console.log("Conectado");
+      }
     })
   })
 
@@ -44,15 +45,16 @@ const Home = () => {
   // setInterval(() => fetchData(), 2000)
 
   return (
+    <Container maxWidth='lg'>
     <Grid
       container
       alignContent='center'
       alignItems='center'
       direction='row'
-      spacing={3}
+      spacing={5}
     >
       {dev.map((device, index) => (
-        <Grid item sm={3} key={index}>
+        <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
           <Device
             name={device.name}
             id={device.id}
@@ -62,6 +64,7 @@ const Home = () => {
         </Grid>
       ))}
     </Grid>
+    </Container>
   )
 }
 
