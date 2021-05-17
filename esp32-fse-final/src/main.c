@@ -19,7 +19,7 @@
 #define CHANNEL 0
 
 xSemaphoreHandle conexaoWifiSemaphore;
-xSemaphoreHandle conexaoMQTTSemaphore;
+xSemaphoreHandle sendTemperatureHumiditySemaphore;;
 
 int initialized = 0;
 
@@ -49,7 +49,7 @@ void conectadoWifi(void *params)
 //       //   dhtreading = DHT11_read();
 //       // }
     
-//       vTaskDelay(2000 / portTICK_PERIOD_MS);
+//       
 //     }
 //   }
 // }
@@ -65,7 +65,7 @@ void app_main()
   ESP_ERROR_CHECK(ret);
 
   conexaoWifiSemaphore = xSemaphoreCreateBinary();
-  conexaoMQTTSemaphore = xSemaphoreCreateBinary();
+  sendTemperatureHumiditySemaphore = xSemaphoreCreateBinary();
   wifi_start();
 
   xTaskCreate(&conectadoWifi, "Conexão ao MQTT", 4096, NULL, 1, NULL);
