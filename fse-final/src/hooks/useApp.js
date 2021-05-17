@@ -10,6 +10,7 @@ export const AppContextDefaultValues = {
   changePage: () => null,
   addDevice: () => null,
   client: '',
+  device: '',
 }
 
 export const AppContext = createContext(AppContextDefaultValues)
@@ -21,6 +22,7 @@ const AppProvider = ({ children }) => {
 
 
   const client = mqtt.connect('wss://test.mosquitto.org:8081')
+  const device = mqtt.connect('wss://test.mosquitto.org:8081')
 
 
   const changePage = (url) => {
@@ -35,7 +37,8 @@ const AppProvider = ({ children }) => {
         changePage,
         devices: devices,
         addDevice: setDevices,
-        client: client
+        client: client,
+        device: device
       }}
     >
       {children}
