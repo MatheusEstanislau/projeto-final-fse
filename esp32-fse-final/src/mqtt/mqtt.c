@@ -22,9 +22,11 @@
 #include "../setup/setup.h"
 #include <stdbool.h>
 
+#include "../dht/dht11.h"
+
 #define TAG "MQTT"
 
-extern xSemaphoreHandle conexaoMQTTSemaphore;
+extern xSemaphoreHandle sendTemperatureHumiditySemaphore;
 esp_mqtt_client_handle_t client;
 
 #define BASE_TOPIC "fse2020/150141220/"
@@ -36,7 +38,6 @@ void mqtt_connected()
     cJSON *json;
     json = cJSON_CreateObject();
     ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
-    xSemaphoreGive(conexaoMQTTSemaphore);
     char registerTopic[60];
     strcpy(registerTopic, BASE_TOPIC);
     strcat(registerTopic, "dispositivos/");
@@ -46,7 +47,8 @@ void mqtt_connected()
     char *string = cJSON_Print(json);
     mqtt_envia_mensagem(registerTopic, string);
 
-    int msg_id = esp_mqtt_client_subscribe(client, registerTopic, 0);
+    // int msg_id = esp_mqtt_client_subscribe(client, registerTopic, 0);
+    esp_mqtt_client_subscribe(client, registerTopic, 0);
 }
 
 void build_string_topic(char *roomValue)
@@ -63,35 +65,50 @@ void build_string_topic(char *roomValue)
     strcat(humidityTopic, "/umidade");
 }
 
-void initialize_temperature()
+void initialize_temperature(int temperatureParam)
 {
-    cJSON *temperature;
-    temperature = cJSON_CreateObject();
-    cJSON_AddNumberToObject(temperature, "temperature", 25);
-    mqtt_envia_mensagem(temperatureTopic, cJSON_Print(temperature));
+    cJSON *temperatureJson;
+    temperatureJson = cJSON_CreateObject();
+    cJSON_AddNumberToObject(temperatureJson, "temperature", temperatureParam);
+    mqtt_envia_mensagem(temperatureTopic, cJSON_Print(temperatureJson));
 }
 
-void initialize_humidity()
+void initialize_humidity(int humidity)
 {
-    cJSON *humidity;
-    humidity = cJSON_CreateObject();
-    cJSON_AddNumberToObject(humidity, "humidity", 55);
-    mqtt_envia_mensagem(humidityTopic, cJSON_Print(humidity));
+    cJSON *humidityJSON;
+    humidityJSON = cJSON_CreateObject();
+    cJSON_AddNumberToObject(humidityJSON, "humidity", humidity);
+    mqtt_envia_mensagem(humidityTopic, cJSON_Print(humidityJSON));
+}
+
+void sendTemperatureHumidity()
+{
+    struct dht11_reading dhtreading;
+    DHT11_init(GPIO_NUM_4);
+    if (xSemaphoreTake(sendTemperatureHumiditySemaphore, portMAX_DELAY))
+    {
+        while (true)
+        {
+            dhtreading = DHT11_read();
+            initialize_temperature(dhtreading.temperature);
+            initialize_humidity(dhtreading.humidity);
+            vTaskDelay(2000 / portTICK_PERIOD_MS);
+        }
+    }
 }
 
 void mqtt_message_handler(char *messageRecieved)
 {
-    bool checkItem;
+    // bool checkItem;
     cJSON *message;
     message = cJSON_Parse(messageRecieved);
     if (cJSON_HasObjectItem(message, "installedRoom"))
     {
-        bool initialized = true;
+        // bool initialized = true;
         char room[30];
         strcpy(room, cJSON_GetObjectItem(message, "installedRoom")->valuestring);
         build_string_topic(room);
-        initialize_temperature();
-        initialize_humidity();
+        xTaskCreate(&sendTemperatureHumidity, "Send temperature and humidity", 4096, NULL, 1, NULL);
 
         // Como pegar um valor de atributo JSON em C:
         // printf("Nome do comodo: %s\n", cJSON_GetObjectItem(message, "installedRoom")->valuestring);
@@ -100,11 +117,12 @@ void mqtt_message_handler(char *messageRecieved)
 
 static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
 {
-    esp_mqtt_client_handle_t client = event->client;
+    // esp_mqtt_client_handle_t client = event->client;
 
     switch (event->event_id)
     {
     case MQTT_EVENT_CONNECTED:
+        xSemaphoreGive(sendTemperatureHumiditySemaphore);
         mqtt_connected();
         break;
 
@@ -130,7 +148,6 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
         printf("DATA=%.*s\r\n", event->data_len, event->data);
 
         mqtt_message_handler(event->data);
-
         break;
 
     case MQTT_EVENT_ERROR:
