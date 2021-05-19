@@ -25,10 +25,11 @@ A interface de usuário foi implementada em React JS e o código da ESP32 foi im
 
 Inicialmente, certifique-se de realizar as conexões físicas necessárias a placa ESP32 (consulte o enunciado do projeto para mais detalhes).
 
-Antes de executar o projeto, certiffique-se de alterar as variáveis de ambiente da configuração do Wifi, adicionando o nome e senha da rede.
+Antes de executar o projeto, certifique-se de alterar as variáveis de ambiente da configuração do Wifi, adicionando o nome e senha da rede.
 
 ![image](https://user-images.githubusercontent.com/44438591/118821999-245eee00-b88e-11eb-83c3-0cf58d40c607.png)
 
+Com a placa ligada e conectada a internet, execute o código da interface de usuário. Primeiramente é necessário instalar as dependências. Entre no dirtório ```fse-final``` e execute:
 
 ```yarn```
 
@@ -38,5 +39,5 @@ Essa etapa pode demorar um pouco, dependendo da máquina e/ou velocidade da inte
 
 Assim que o frontend iniciar, acesse no seu browser o link que for informado, provavelmente http://localhost:3000/
 
-Após a execução do servidor central, entre no diretório do dispositivo embarcado, ```cd esp32-fse-final``` e execute o projeto utilizando a ferramenta PlatformIO, após a inicialização será enviado para o servidor central, via protocolo mqtt a mensagem de registro, dentro do servidor central será necessário realizar o cadastro do comodo desejado, apra isso basta clicar no botão "Add Name", digitar o nome do comodo desejado, pressionar o botão "Send" e depois o botão "Confirm", após registrado será enviado as leituras de umidade e temperatura do dispositivo, e também poderá realizar o acionamento do alarme e do led.
+Após a execução do servidor central, entre no diretório do dispositivo embarcado, ```cd esp32-fse-final``` e execute o projeto utilizando a ferramenta PlatformIO. Após a inicialização será enviado para o servidor central via protocolo MQTT a mensagem de registro. Dentro do servidor central será necessário realizar o cadastro do cômodo desejado, para isso basta clicar no botão "Add Name", digitar o nome do cômodo desejado, pressionar o botão "Send" e depois o botão "Confirm". Após registrado serão enviadas as leituras de umidade e temperatura do dispositivo, e também poderá realizar o acionamento do alarme e do led.
 
