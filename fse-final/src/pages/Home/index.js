@@ -35,14 +35,7 @@ const Home = () => {
 
   useEffect(() => {
     setDev(devices)
-  }, [dev, devices])
-
-  // const [data, setData] = useState('');
-  // const fetchData = async () => {
-  //   const {data } = await api.get('hello')
-  //   setData(data.hello)
-  // }
-  // setInterval(() => fetchData(), 2000)
+  }, [dev, devices]) 
 
   return (
     <Container maxWidth='lg'>

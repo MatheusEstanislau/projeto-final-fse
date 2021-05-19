@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import {
   Card,
   Typography,
@@ -9,93 +9,133 @@ import {
   Box,
 } from '@material-ui/core'
 import { useApp } from '../../hooks/useApp'
-import { useCallback } from 'react'
+import Switch from '../Switch'
 import esp32 from '../../assets/esp32.jpg'
+import mp3 from '../../utils/audioPlayer'
 
-const Device = ({ name, id, temperature, humidity }) => {
+
+const useStyles = makeStyles((theme) => ({
+  card: {},
+  title: {
+    textAlign: 'center',
+  },
+  addNameButton: {
+    backgroundColor: 'rebeccapurple',
+    color: 'white',
+    marginTop: '1rem',
+    marginBottom: '1rem',
+  },
+  sendButton: {
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
+    backgroundColor: 'rebeccapurple',
+    color: 'white',
+  },
+  textField: {
+    [`& fieldset`]: {
+      borderTopRightRadius: 0,
+      borderBottomRightRadius: 0,
+    },
+  },
+  textBox: {
+    padding: 10,
+    display: 'flex',
+    justifyContent: 'space-between',
+  },
+  media: {
+    height: 100,
+  },
+  boxButton: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  content: {
+    padding: 5,
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  alarmBox: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+}))
+
+const Device = ({ name, id }) => {
   const [showInput, setShowInput] = useState(false)
+  const [confirm, setConfirm] = useState(false)
   const [deviceName, setDeviceName] = useState('')
   const [deviceTemperature, setDeviceTemperature] = useState(0)
   const [deviceHumidity, setDeviceHumidity] = useState(0)
   const { device, client } = useApp()
+  const [registred, setRegistred] = useState(false)
+  const [isAlarmOn, setIsAlarmOn] = useState(true)
+  const [lamp, setLamp] = useState(true)
 
   const handleClick = () => {
-    setShowInput(true)
+    setShowInput(!showInput)
   }
 
   const handleChange = (e) => {
     setDeviceName(e.target.value)
   }
 
-  const publishName = useCallback(() => {
+  const showConfirm = () => {
+    setConfirm(true)
+  }
+
+  const publishName = () => {
     if (deviceName !== '') {
-      console.log(`fse2020/150141220/${deviceName}/#`)
       device.subscribe(`fse2020/150141220/${deviceName}/#`)
       client.publish(
         `fse2020/150141220/dispositivos/${id}`,
-        `{ "installedRoom": "${deviceName}"}`
+        `{ "installedRoom": "${deviceName}" }`
       )
       setShowInput(false)
+      setConfirm(false)
+      setRegistred(true)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deviceName])
+  }
 
-  useEffect(() => {
-    const handleNewMessage = (topic, message) => {
-      if (topic === `fse2020/150141220/${deviceName}/temperatura`) {
-        const parsed = JSON.parse(message)
-        setDeviceTemperature(parsed.temperature)
-      } else if (topic === `fse2020/150141220/${deviceName}/umidade`) {
-        const parsed = JSON.parse(message)
-        setDeviceHumidity(parsed.humidity)
+  const handleNewMessage = (topic, message) => {
+    if (topic === `fse2020/150141220/${deviceName}/temperatura`) {
+      const parsed = JSON.parse(message)
+      if (parsed.temperature !== -1) setDeviceTemperature(parsed.temperature)
+    } else if (topic === `fse2020/150141220/${deviceName}/umidade`) {
+      const parsed = JSON.parse(message)
+      if (parsed.humidity !== -1) setDeviceHumidity(parsed.humidity)
+    } else if (topic === `fse2020/150141220/${deviceName}`) {
+      const parsed = JSON.parse(message)
+      if (parsed?.alarm === 1) {
+        playAlarm()
       }
     }
-    device.on('message', handleNewMessage)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [publishName])
+  }
 
-  const useStyles = makeStyles((theme) => ({
-    card: {},
-    title: {
-      textAlign: 'center',
-    },
-    addNameButton: {
-      backgroundColor: 'rebeccapurple',
-      color: 'white',
-      marginTop: '1rem',
-      marginBottom: '1rem',
-    },
-    sendButton: {
-      borderTopLeftRadius: 0,
-      borderBottomLeftRadius: 0,
-      backgroundColor: 'rebeccapurple',
-      color: 'white',
-    },
-    textField: {
-      [`& fieldset`]: {
-        borderTopRightRadius: 0,
-        borderBottomRightRadius: 0,
-      },
-    },
-    textBox: {
-      padding: 10,
-      display: 'flex',
-      justifyContent: 'space-between',
-    },
-    media: {
-      height: 100,
-    },
-    boxButton: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    content: {
-      padding: 5,
-      display: 'flex',
-      flexDirection: 'column',
-    },
-  }))
+
+  device.on('message', handleNewMessage)
+
+  const playAlarm = () => {
+    if (!isAlarmOn) mp3.play()
+  }
+
+  const toggleAlarm = () => {
+    setIsAlarmOn(!isAlarmOn)
+    client.publish(
+      `fse2020/150141220/dispositivos/${id}`,
+      `{ "alarm" : ${isAlarmOn} }`
+    )
+  }
+
+  const toggleLamp = () => {
+    setLamp(!lamp)
+    client.publish(
+      `fse2020/150141220/dispositivos/${id}`,
+      `{ "lamp" : ${lamp} }`
+    )
+  }
 
   const styles = useStyles()
 
@@ -110,17 +150,28 @@ const Device = ({ name, id, temperature, humidity }) => {
         <Typography>{`Device name: ${
           deviceName ? deviceName : 'Choose '
         }`}</Typography>
-        <Typography>{`Temperature: ${deviceTemperature}`}</Typography>
-        <Typography>{`Humidity: ${deviceHumidity}`}</Typography>
+        {registred ? (
+          <>
+            <Typography>{`Temperature: ${deviceTemperature}`}</Typography>
+            <Typography>{`Humidity: ${deviceHumidity}`}</Typography>
+            <Box className={styles.alarmBox}>
+              <Typography>Alarm: </Typography>
+              <Switch state={!isAlarmOn} onChange={() => toggleAlarm()} />
+            </Box>
+            <Box className={styles.alarmBox}>
+              <Typography>Lamp: </Typography>
+              <Switch state={!lamp} onChange={() => toggleLamp()} />
+            </Box>
+          </>
+        ) : null}
       </Box>
-
       {name === '' ? (
         <Box className={styles.boxButton}>
           <Button
             className={styles.addNameButton}
             onClick={() => handleClick()}
           >
-            Add name
+            {showInput ? 'Cancel' : 'Add Name'}
           </Button>
         </Box>
       ) : null}
@@ -131,8 +182,18 @@ const Device = ({ name, id, temperature, humidity }) => {
             variant='outlined'
             onChange={(e) => handleChange(e)}
           />
-          <Button className={styles.sendButton} onClick={() => publishName()}>
+          <Button className={styles.sendButton} onClick={() => showConfirm()}>
             Send
+          </Button>
+        </Box>
+      ) : null}
+      {confirm ? (
+        <Box className={styles.boxButton}>
+          <Button
+            className={styles.addNameButton}
+            onClick={() => publishName()}
+          >
+            Confirm
           </Button>
         </Box>
       ) : null}
