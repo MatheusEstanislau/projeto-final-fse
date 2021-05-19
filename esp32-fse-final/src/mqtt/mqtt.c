@@ -25,6 +25,8 @@
 #include "../dht/dht11.h"
 #include "led/ledGpio.h"
 
+#include "../button/buttonGpio.h"
+
 #define TAG "MQTT"
 
 extern xSemaphoreHandle sendTemperatureHumiditySemaphore;
@@ -33,6 +35,7 @@ esp_mqtt_client_handle_t client;
 #define BASE_TOPIC "fse2020/150141220/"
 char temperatureTopic[60] = "fse2020/150141220/";
 char humidityTopic[60] = "fse2020/150141220/";
+char room[30];
 
 void mqtt_connected()
 {
@@ -99,18 +102,40 @@ void sendTemperatureHumidity()
 
 void mqtt_message_handler(char *messageRecieved)
 {
-    handleLed(1);
     cJSON *message;
     message = cJSON_Parse(messageRecieved);
     if (cJSON_HasObjectItem(message, "installedRoom"))
     {
-        char room[30];
         strcpy(room, cJSON_GetObjectItem(message, "installedRoom")->valuestring);
         build_string_topic(room);
         xTaskCreate(&sendTemperatureHumidity, "Send temperature and humidity", 4096, NULL, 1, NULL);
-
-        // Como pegar um valor de atributo JSON em C:
-        // printf("Nome do comodo: %s\n", cJSON_GetObjectItem(message, "installedRoom")->valuestring);
+    }
+    else if (cJSON_HasObjectItem(message, "alarm"))
+    {
+        char alarmState = cJSON_GetObjectItem(message, "alarm")->valueint;
+        if (alarmState)
+        {
+            char url[60];
+            strcpy(url, BASE_TOPIC);
+            strcat(url, room);
+            activeAlarm(url);
+        }
+        else
+        {
+            disableAlarm();
+        }
+    }
+    else if (cJSON_HasObjectItem(message, "lamp"))
+    {
+        char lampState = cJSON_GetObjectItem(message, "lamp")->valueint;
+        if (lampState)
+        {
+            handleLed(1);
+        }
+        else
+        {
+            handleLed(0);
+        }
     }
 }
 
@@ -167,7 +192,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 void mqtt_start()
 {
     esp_mqtt_client_config_t mqtt_config = {
-        .uri = "wss://test.mosquitto.org:8081",
+        .uri = "mqtt://test.mosquitto.org:8080",
     };
     client = esp_mqtt_client_init(&mqtt_config);
     esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, mqtt_event_handler, client);
