@@ -176,7 +176,7 @@ const Device = ({ name, id }) => {
       >{`Device Id: ${id}`}</Typography>
       <CardMedia className={styles.media} image={esp32} title='Paella dish' />
       <Box className={styles.content}>
-        <Typography>{`Device name: ${
+        <Typography>{`Room name: ${
           deviceName ? deviceName : 'Choose '
         }`}</Typography>
         {registred ? (
@@ -209,6 +209,7 @@ const Device = ({ name, id }) => {
           <TextField
             className={styles.textField}
             variant='outlined'
+            placeholder='Enter room name'
             onChange={(e) => handleChange(e)}
             fullWidth
           />
