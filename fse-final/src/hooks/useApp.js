@@ -21,8 +21,8 @@ const AppProvider = ({ children }) => {
   const history = useHistory()
 
 
-  const client = mqtt.connect('wss://test.mosquitto.org:8081')
-  const device = mqtt.connect('wss://test.mosquitto.org:8081')
+  const client = mqtt.connect('mqtt://test.mosquitto.org:8080')
+  const device = mqtt.connect('mqtt://test.mosquitto.org:8080')
 
 
   const changePage = (url) => {

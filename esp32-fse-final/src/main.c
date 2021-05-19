@@ -34,25 +34,6 @@ void conectadoWifi(void *params)
   }
 }
 
-// void trataComunicacaoComServidor(void *params)
-// {
-//   struct dht11_reading dhtreading;
-//   DHT11_init(4);
-  
-//   if (xSemaphoreTake(conexaoMQTTSemaphore, portMAX_DELAY))
-//   {
-//     while (true)
-//     {
-//       // dhtreading = DHT11_read();
-//       // while (dhtreading.status == -1)
-//       // {
-//       //   dhtreading = DHT11_read();
-//       // }
-    
-//       
-//     }
-//   }
-// }
 
 void app_main()
 {
