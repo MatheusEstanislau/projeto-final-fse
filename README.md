@@ -10,6 +10,10 @@ O enunciado do projeto final pode ser acessado em https://gitlab.com/fse_fga/pro
 |15/0141220|Matheus de Cristo Estanislau|
 |17/0044386|Renan Cristyan Araújo Pinheiro|
 
+## Apresentação
+
+Apresentação encontra-se em : [Apresentação](https://github.com/MatheusEstanislau/projeto-final-fse/blob/main/apresentacao_final_FSE.mp4)
+
 ## Objetivo
 
 O objetivo deste trabalho é desenvolver um sistema de automação residencial, com um computador (PC) funcionando como central
