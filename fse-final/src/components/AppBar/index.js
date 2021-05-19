@@ -24,7 +24,7 @@ const AppBar = () => {
     <MuiAppBar position='static'>
       <Toolbar>
         <Typography variant='h6' className={classes.title}>
-          Trabalho Final FSE
+          Final work of FSE
         </Typography>
       </Toolbar>
     </MuiAppBar>

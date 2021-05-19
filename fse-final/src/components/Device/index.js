@@ -12,10 +12,13 @@ import { useApp } from '../../hooks/useApp'
 import Switch from '../Switch'
 import esp32 from '../../assets/esp32.jpg'
 import mp3 from '../../utils/audioPlayer'
-
+import { CSVLink } from 'react-csv'
+import moment from 'moment'
 
 const useStyles = makeStyles((theme) => ({
-  card: {},
+  card: {
+    paddingBottom: 10
+  },
   title: {
     textAlign: 'center',
   },
@@ -73,6 +76,7 @@ const Device = ({ name, id }) => {
   const [registred, setRegistred] = useState(false)
   const [isAlarmOn, setIsAlarmOn] = useState(true)
   const [lamp, setLamp] = useState(true)
+  const [logData, setLogData] = useState([['Command', 'State', 'Time']])
 
   const handleClick = () => {
     setShowInput(!showInput)
@@ -114,11 +118,20 @@ const Device = ({ name, id }) => {
     }
   }
 
-
   device.on('message', handleNewMessage)
 
   const playAlarm = () => {
-    if (!isAlarmOn) mp3.play()
+    if (!isAlarmOn) {
+      mp3.play()
+      setLogData((prevState) => [
+        ...prevState,
+        [
+          'Play alarm',
+          `${!isAlarmOn}`,
+          `${moment().format('DD-MM-YYYY hh:mm:ss')}`,
+        ],
+      ])
+    }
   }
 
   const toggleAlarm = () => {
@@ -127,6 +140,14 @@ const Device = ({ name, id }) => {
       `fse2020/150141220/dispositivos/${id}`,
       `{ "alarm" : ${isAlarmOn} }`
     )
+    setLogData((prevState) => [
+      ...prevState,
+      [
+        'Toogle Alarm',
+        `${isAlarmOn}`,
+        `${moment().format('DD-MM-YYYY hh:mm:ss')}`,
+      ],
+    ])
   }
 
   const toggleLamp = () => {
@@ -135,6 +156,14 @@ const Device = ({ name, id }) => {
       `fse2020/150141220/dispositivos/${id}`,
       `{ "lamp" : ${lamp} }`
     )
+    setLogData((prevState) => [
+      ...prevState,
+      [
+        'Toogle Lamp',
+        `${lamp}`,
+        `${moment().format('DD-MM-YYYY hh:mm:ss')}`,
+      ],
+    ])
   }
 
   const styles = useStyles()
@@ -152,8 +181,8 @@ const Device = ({ name, id }) => {
         }`}</Typography>
         {registred ? (
           <>
-            <Typography>{`Temperature: ${deviceTemperature}`}</Typography>
-            <Typography>{`Humidity: ${deviceHumidity}`}</Typography>
+            <Typography>{`Temperature: ${deviceTemperature} ºC`}</Typography>
+            <Typography>{`Humidity: ${deviceHumidity} %`}</Typography>
             <Box className={styles.alarmBox}>
               <Typography>Alarm: </Typography>
               <Switch state={!isAlarmOn} onChange={() => toggleAlarm()} />
@@ -181,6 +210,7 @@ const Device = ({ name, id }) => {
             className={styles.textField}
             variant='outlined'
             onChange={(e) => handleChange(e)}
+            fullWidth
           />
           <Button className={styles.sendButton} onClick={() => showConfirm()}>
             Send
@@ -197,6 +227,7 @@ const Device = ({ name, id }) => {
           </Button>
         </Box>
       ) : null}
+      <CSVLink className={styles.boxButton} data={logData}>Download Log</CSVLink>
     </Card>
   )
 }
