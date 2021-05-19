@@ -36,6 +36,7 @@ esp_mqtt_client_handle_t client;
 char temperatureTopic[60] = "fse2020/150141220/";
 char humidityTopic[60] = "fse2020/150141220/";
 char room[30];
+int registered = 0;
 
 void mqtt_connected()
 {
@@ -49,7 +50,11 @@ void mqtt_connected()
     cJSON_AddStringToObject(json, "id", obtemMacAddress());
 
     char *string = cJSON_Print(json);
-    mqtt_envia_mensagem(registerTopic, string);
+    if (registered == 0)
+    {
+        mqtt_envia_mensagem(registerTopic, string);
+        registered = 1;
+    }
 
     esp_mqtt_client_subscribe(client, registerTopic, 0);
 }
